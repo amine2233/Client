@@ -41,7 +41,7 @@ github "amine2233/Client"
 $ carthage update
 ```
 
-### [Swift Package Manager](https://github.com/Carthage/Carthage)
+### [Swift Package Manager](https://swift.org/package-manager/)
 Add the following to your Package.swift:
 ```swift
 dependencies: [
