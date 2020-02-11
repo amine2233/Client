@@ -87,3 +87,24 @@ public struct StringParameter: RequestParameters {
         return request
     }
 }
+
+public struct CodableParameter<T: Encodable>: RequestParameters {
+    public let model: T
+
+    public init(model: T) {
+        self.model = model
+    }
+
+    public func apply(urlRequest: URLRequest) -> URLRequest {
+        var request = urlRequest
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        if let data = try? JSONEncoder().encode(model) {
+            request.httpBody = data
+        } else {
+            fatalError()
+        }
+
+        return request
+    }
+}
