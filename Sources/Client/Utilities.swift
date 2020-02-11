@@ -12,8 +12,8 @@ extension String {
 
     func appendingPathComponent(_ pathComponent: String) -> String {
         // TODO: Need to change NSString to String for working on Server-Side linux
-        //return NSString(string: self).appendingPathComponent(pathComponent)
-        return URL(fileURLWithPath: self).appendingPathComponent(pathComponent).path
+        return NSString(string: self).appendingPathComponent(pathComponent)
+        //return URL(fileURLWithPath: self).appendingPathComponent(pathComponent).path
     }
 }
 

@@ -88,10 +88,10 @@ public struct StringParameter: RequestParameters {
     }
 }
 
-public struct CodableParameter<T: Encodable>: RequestParameters {
+public struct EncodableParameter<T: Encodable>: RequestParameters {
     public let model: T
 
-    public init(model: T) {
+    public init(_ model: T) {
         self.model = model
     }
 
