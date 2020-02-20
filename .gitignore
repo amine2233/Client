@@ -34,4 +34,4 @@ Carthage/Build
 
 # Other files
 core
-..build
+.build
