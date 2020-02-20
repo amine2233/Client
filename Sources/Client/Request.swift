@@ -7,25 +7,37 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
+/// The request method type
 public enum HTTPMethod: String {
-    case get = "GET"
-    case put = "PUT"
-    case post = "POST"
-    case patch = "PATCH"
+    case get    = "GET"
+    case put    = "PUT"
+    case post   = "POST"
+    case patch  = "PATCH"
     case delete = "DELETE"
-    case head = "HEAD"
+    case head   = "HEAD"
 }
 
+/// The request builder `Request<Resource, Error: Swift.Error>`
 public struct Request<Resource, Error: Swift.Error> {
 
+    /// The request path
     public var path: String
+    /// The request method type `HTTPMethod`
     public var method: HTTPMethod
+    /// The query parameters
     public var parameters: RequestParameters?
+    /// The headers parameters
     public var headers: [String: String]?
+    /// The resource parser, use this callback to parse a success response
     public var resource: (Data) throws -> Resource  // Resource parser
+    /// The failure parser, use this callback to parse a failure response
     public var error: (Data) throws -> Error        // Error parser
 
+    /// Create a new Request
     public init(path: String,
                 method: HTTPMethod,
                 parameters: RequestParameters? = nil,
@@ -44,6 +56,7 @@ public struct Request<Resource, Error: Swift.Error> {
 
 extension Request {
 
+    /// Send a request and get a `URLSessionTask`
     @discardableResult
     public func response(using client: Client, completion: @escaping (Result<Resource,Client.Error>) -> Void) -> URLSessionTask {
         return client.perform(self, completion: completion)

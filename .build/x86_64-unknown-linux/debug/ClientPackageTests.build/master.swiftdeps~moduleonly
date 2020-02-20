@@ -1,0 +1,5 @@
+version: "Swift version 5.1.4 (swift-5.1.4-RELEASE)"
+options: "2cb9bdb6dfcce0298c3998221ac2747f"
+build_time: [1582036363, 481573307]
+inputs:
+  "/src/Tests/LinuxMain.swift": [1582033609, 0]

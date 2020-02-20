@@ -10,10 +10,21 @@ import Foundation
 
 extension String {
 
+    /**
+     Add a path component \ after the `String`
+
+     Exemple:
+        ```
+        let urlString = "http://intech-consulting.fr"
+        let appendingPathComponent = urlString.appendingPathComponent("v1/users/login")
+        /// return "http://intech-consulting.fr/v1/users/login"
+        ```
+
+     - Returns: A `String`
+     */
     func appendingPathComponent(_ pathComponent: String) -> String {
-        // TODO: Need to change NSString to String for working on Server-Side linux
-        return NSString(string: self).appendingPathComponent(pathComponent)
-        //return URL(fileURLWithPath: self).appendingPathComponent(pathComponent).path
+        // TODO: Need a best solution than this code
+        return self + "/" + pathComponent
     }
 }
 

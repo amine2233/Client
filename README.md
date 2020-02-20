@@ -58,6 +58,47 @@ $ swift package update
 
 > Todo: usage exemple
 
+## RUN on Linux with Docker
+
+### Running the Docker container
+
+First, download, install, and run Docker Desktop or on Terminal for Mac.
+
+In Terminal, switch to the directory of the Swift package you want to test.
+
+Then run this command:
+
+```Bash
+docker run --rm --privileged --interactive --tty \
+    --volume "$(pwd):/src" \
+    --workdir "/src" \
+    swift:latest
+```
+
+This tells Docker to create a Linux container with the latest Swift version installed and open a shell in it. The first time you run it, Docker will need a few seconds to download the image for the container; subsequent runs will be instantaneous.
+
+
+```
+# Older Swift versions
+To test on older Swift versions, replace swift:latest with a different tag, e.g. swift:5.0. The Docker Hub page for the official Swift image lists all available tags for released Swift versions.
+
+# Prerelease Swift versions
+Recently, the Swift CI team has also begun to publish nightly Swift builds to Docker. For instance, use the swiftlang/swift:nightly-5.2-bionic image to test your code on the latest Swift 5.2 snapshot. The available tag names are listed on the downloads page on swift.org.
+```
+
+### Running Swift commands in the Linux container
+
+Use the usual commands to interact with the Swift compiler or package manager in the Linux environment. For example:
+
+```Bash
+swift --version
+swift build
+swift test --enable-test-discovery
+```
+> Note that the `/src` directory in the Linux container is a direct mirror of the current directory on the host OS, not a copy. If you delete a file in `/src` in the Linux container, that file will be gone on the host OS, too.
+
+Type `exit` or `Ctrl+D` to exit the Linux shell and return to macOS.
+
 ## Contribution
 Welcome to fork and submit pull requests!!
 

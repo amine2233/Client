@@ -1,0 +1,66 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "ClientTests"
+provides-nominal:
+- "11ClientTestsAAC"
+provides-member:
+- ["11ClientTestsAAC", ""]
+depends-top-level:
+- "ClientTests"
+- !private "FloatLiteralType"
+- !private "IntegerLiteralType"
+- "StringLiteralType"
+- "XCTestCase"
+depends-member:
+- ["11ClientTestsAAC", "allTests"]
+- ["11ClientTestsAAC", "init"]
+- !private ["11ClientTestsAAC", "measure"]
+- ["11ClientTestsAAC", "setUp"]
+- ["11ClientTestsAAC", "tearDown"]
+- ["11ClientTestsAAC", "testExample"]
+- ["11ClientTestsAAC", "testPerformanceExample"]
+- ["6XCTest8ListableP", ""]
+- !private ["6XCTest8ListableP", "init"]
+- !private ["6XCTest8ListableP", "measure"]
+- ["6XCTest8ListableP", "testExample"]
+- ["6XCTest24PerformanceMeterDelegateP", ""]
+- !private ["6XCTest24PerformanceMeterDelegateP", "init"]
+- !private ["6XCTest24PerformanceMeterDelegateP", "measure"]
+- ["6XCTest24PerformanceMeterDelegateP", "testExample"]
+- ["6XCTest17XCTWaiterDelegateP", ""]
+- !private ["6XCTest17XCTWaiterDelegateP", "init"]
+- !private ["6XCTest17XCTWaiterDelegateP", "measure"]
+- ["6XCTest17XCTWaiterDelegateP", "testExample"]
+- ["6XCTestAAC", "allTests"]
+- !private ["6XCTestAAC", "measure"]
+- ["6XCTestAAC", "setUp"]
+- ["6XCTestAAC", "tearDown"]
+- ["6XCTestAAC", "testExample"]
+- ["6XCTestAAC", "testPerformanceExample"]
+- ["6XCTest0A4CaseC", ""]
+- ["6XCTest0A4CaseC", "allTests"]
+- ["6XCTest0A4CaseC", "init"]
+- !private ["6XCTest0A4CaseC", "measure"]
+- ["6XCTest0A4CaseC", "setUp"]
+- ["6XCTest0A4CaseC", "tearDown"]
+- ["6XCTest0A4CaseC", "testExample"]
+- ["6XCTest0A4CaseC", "testPerformanceExample"]
+depends-nominal:
+- "11ClientTestsAAC"
+- "6XCTest8ListableP"
+- "6XCTest24PerformanceMeterDelegateP"
+- "6XCTest17XCTWaiterDelegateP"
+- "6XCTestAAC"
+- "6XCTest0A4CaseC"
+depends-dynamic-lookup:
+depends-external:
+- "/usr/lib/swift/linux/x86_64/Glibc.swiftmodule"
+- "/usr/lib/swift/linux/x86_64/FoundationNetworking.swiftmodule"
+- "/usr/lib/swift/linux/x86_64/Dispatch.swiftmodule"
+- "/usr/lib/swift/linux/x86_64/Foundation.swiftmodule"
+- "/usr/lib/swift/linux/x86_64/Swift.swiftmodule"
+- "/src/.build/x86_64-unknown-linux/debug/Client.swiftmodule"
+- "/usr/lib/swift/linux/x86_64/SwiftOnoneSupport.swiftmodule"
+- "/usr/lib/swift/linux/x86_64/XCTest.swiftmodule"
+- "/usr/lib/swift/linux/x86_64/glibc.modulemap"
+interface-hash: "309ae19739061fde7a558c1a3969cfd3"

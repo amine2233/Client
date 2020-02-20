@@ -10,6 +10,9 @@ import Foundation
 #if canImport(UIKit)
 import UIKit
 #endif
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 open class Client {
     public enum Error: Swift.Error, LocalizedError {

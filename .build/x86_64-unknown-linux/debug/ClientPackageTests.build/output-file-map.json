@@ -1,0 +1,11 @@
+{
+  "": {
+    "swift-dependencies": "/src/.build/x86_64-unknown-linux/debug/ClientPackageTests.build/master.swiftdeps"
+  },
+  "/src/Tests/LinuxMain.swift": {
+    "dependencies": "/src/.build/x86_64-unknown-linux/debug/ClientPackageTests.build/LinuxMain.d",
+    "object": "/src/.build/x86_64-unknown-linux/debug/ClientPackageTests.build/LinuxMain.swift.o",
+    "swiftmodule": "/src/.build/x86_64-unknown-linux/debug/ClientPackageTests.build/LinuxMain~partial.swiftmodule",
+    "swift-dependencies": "/src/.build/x86_64-unknown-linux/debug/ClientPackageTests.build/LinuxMain.swiftdeps"
+  }
+}

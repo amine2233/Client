@@ -1,0 +1,23 @@
+{
+  "": {
+    "swift-dependencies": "/src/.build/x86_64-unknown-linux/debug/ClientTests.build/master.swiftdeps"
+  },
+  "/src/Tests/ClientTests/ClientTests.swift": {
+    "dependencies": "/src/.build/x86_64-unknown-linux/debug/ClientTests.build/ClientTests.d",
+    "object": "/src/.build/x86_64-unknown-linux/debug/ClientTests.build/ClientTests.swift.o",
+    "swiftmodule": "/src/.build/x86_64-unknown-linux/debug/ClientTests.build/ClientTests~partial.swiftmodule",
+    "swift-dependencies": "/src/.build/x86_64-unknown-linux/debug/ClientTests.build/ClientTests.swiftdeps"
+  },
+  "/src/Tests/ClientTests/UtilitiesTests.swift": {
+    "dependencies": "/src/.build/x86_64-unknown-linux/debug/ClientTests.build/UtilitiesTests.d",
+    "object": "/src/.build/x86_64-unknown-linux/debug/ClientTests.build/UtilitiesTests.swift.o",
+    "swiftmodule": "/src/.build/x86_64-unknown-linux/debug/ClientTests.build/UtilitiesTests~partial.swiftmodule",
+    "swift-dependencies": "/src/.build/x86_64-unknown-linux/debug/ClientTests.build/UtilitiesTests.swiftdeps"
+  },
+  "/src/Tests/ClientTests/XCTestManifests.swift": {
+    "dependencies": "/src/.build/x86_64-unknown-linux/debug/ClientTests.build/XCTestManifests.d",
+    "object": "/src/.build/x86_64-unknown-linux/debug/ClientTests.build/XCTestManifests.swift.o",
+    "swiftmodule": "/src/.build/x86_64-unknown-linux/debug/ClientTests.build/XCTestManifests~partial.swiftmodule",
+    "swift-dependencies": "/src/.build/x86_64-unknown-linux/debug/ClientTests.build/XCTestManifests.swiftdeps"
+  }
+}

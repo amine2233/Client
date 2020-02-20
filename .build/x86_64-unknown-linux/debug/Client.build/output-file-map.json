@@ -1,0 +1,47 @@
+{
+  "": {
+    "swift-dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/master.swiftdeps"
+  },
+  "/src/Sources/Client/BasicAuth.swift": {
+    "dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/BasicAuth.d",
+    "object": "/src/.build/x86_64-unknown-linux/debug/Client.build/BasicAuth.swift.o",
+    "swiftmodule": "/src/.build/x86_64-unknown-linux/debug/Client.build/BasicAuth~partial.swiftmodule",
+    "swift-dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/BasicAuth.swiftdeps"
+  },
+  "/src/Sources/Client/Client.swift": {
+    "dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/Client.d",
+    "object": "/src/.build/x86_64-unknown-linux/debug/Client.build/Client.swift.o",
+    "swiftmodule": "/src/.build/x86_64-unknown-linux/debug/Client.build/Client~partial.swiftmodule",
+    "swift-dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/Client.swiftdeps"
+  },
+  "/src/Sources/Client/Logger.swift": {
+    "dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/Logger.d",
+    "object": "/src/.build/x86_64-unknown-linux/debug/Client.build/Logger.swift.o",
+    "swiftmodule": "/src/.build/x86_64-unknown-linux/debug/Client.build/Logger~partial.swiftmodule",
+    "swift-dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/Logger.swiftdeps"
+  },
+  "/src/Sources/Client/LoggingClient.swift": {
+    "dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/LoggingClient.d",
+    "object": "/src/.build/x86_64-unknown-linux/debug/Client.build/LoggingClient.swift.o",
+    "swiftmodule": "/src/.build/x86_64-unknown-linux/debug/Client.build/LoggingClient~partial.swiftmodule",
+    "swift-dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/LoggingClient.swiftdeps"
+  },
+  "/src/Sources/Client/Request.swift": {
+    "dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/Request.d",
+    "object": "/src/.build/x86_64-unknown-linux/debug/Client.build/Request.swift.o",
+    "swiftmodule": "/src/.build/x86_64-unknown-linux/debug/Client.build/Request~partial.swiftmodule",
+    "swift-dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/Request.swiftdeps"
+  },
+  "/src/Sources/Client/RequestParameters.swift": {
+    "dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/RequestParameters.d",
+    "object": "/src/.build/x86_64-unknown-linux/debug/Client.build/RequestParameters.swift.o",
+    "swiftmodule": "/src/.build/x86_64-unknown-linux/debug/Client.build/RequestParameters~partial.swiftmodule",
+    "swift-dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/RequestParameters.swiftdeps"
+  },
+  "/src/Sources/Client/Utilities.swift": {
+    "dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/Utilities.d",
+    "object": "/src/.build/x86_64-unknown-linux/debug/Client.build/Utilities.swift.o",
+    "swiftmodule": "/src/.build/x86_64-unknown-linux/debug/Client.build/Utilities~partial.swiftmodule",
+    "swift-dependencies": "/src/.build/x86_64-unknown-linux/debug/Client.build/Utilities.swiftdeps"
+  }
+}

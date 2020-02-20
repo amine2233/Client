@@ -1,0 +1,7 @@
+version: "Swift version 5.1.4 (swift-5.1.4-RELEASE)"
+options: "1404fdc3835600bd6336adbcf7c508db"
+build_time: [1582036363, 194083765]
+inputs:
+  "/src/Tests/ClientTests/ClientTests.swift": [1582033595, 0]
+  "/src/Tests/ClientTests/UtilitiesTests.swift": [1582034449, 0]
+  "/src/Tests/ClientTests/XCTestManifests.swift": [1582034278, 0]

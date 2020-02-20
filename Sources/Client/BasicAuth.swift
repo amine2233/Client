@@ -16,7 +16,7 @@ public enum BasicAuthError: Error {
 
 public struct BasicAuth {
     public static func createBasicAuth(username: String, password: String) throws -> String {
-        let compose = String(format: "%@:%@", username,password)
+        let compose = "\(username):\(password)"
         guard let data = compose.data(using: String.Encoding.utf8) else { throw BasicAuthError.failToData }
         let base64Data = data.base64EncodedData()
         guard let encode = String(data: base64Data, encoding: String.Encoding.utf8) else { throw BasicAuthError.failEencode }

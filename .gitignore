@@ -31,3 +31,6 @@ Carthage/Build
 # Swift-Package-Manager
 .swiftpm
 *.xcodeproj
+
+# Other files
+core

@@ -1,0 +1,39 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "allTests"
+provides-nominal:
+provides-member:
+depends-top-level:
+- !private "ClientTests"
+- !private "UtilitiesTests"
+- "XCTestCaseEntry"
+- "allTests"
+- !private "testCase"
+depends-member:
+- !private ["11ClientTestsAAC", "allTests"]
+- !private ["6XCTest8ListableP", "allTests"]
+- !private ["6XCTest24PerformanceMeterDelegateP", "allTests"]
+- !private ["11ClientTests09UtilitiesB0C", "allTests"]
+- !private ["6XCTest17XCTWaiterDelegateP", "allTests"]
+- !private ["6XCTestAAC", "allTests"]
+- !private ["6XCTest0A4CaseC", "allTests"]
+depends-nominal:
+- !private "11ClientTestsAAC"
+- !private "6XCTest8ListableP"
+- !private "6XCTest24PerformanceMeterDelegateP"
+- !private "11ClientTests09UtilitiesB0C"
+- !private "6XCTest17XCTWaiterDelegateP"
+- !private "6XCTestAAC"
+- !private "6XCTest0A4CaseC"
+depends-dynamic-lookup:
+depends-external:
+- "/usr/lib/swift/linux/x86_64/Glibc.swiftmodule"
+- "/usr/lib/swift/linux/x86_64/FoundationNetworking.swiftmodule"
+- "/usr/lib/swift/linux/x86_64/Dispatch.swiftmodule"
+- "/usr/lib/swift/linux/x86_64/Foundation.swiftmodule"
+- "/usr/lib/swift/linux/x86_64/Swift.swiftmodule"
+- "/src/.build/x86_64-unknown-linux/debug/Client.swiftmodule"
+- "/usr/lib/swift/linux/x86_64/SwiftOnoneSupport.swiftmodule"
+- "/usr/lib/swift/linux/x86_64/XCTest.swiftmodule"
+- "/usr/lib/swift/linux/x86_64/glibc.modulemap"
+interface-hash: "1f055c3b5f27ec04cc14b70a98464945"
