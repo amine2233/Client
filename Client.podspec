@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'Client'
-  s.version = '1.0.0'
+  s.version = '1.1.2'
   s.summary = 'Client lib.'
   s.description = <<-DESC
   Client is a request api lib.

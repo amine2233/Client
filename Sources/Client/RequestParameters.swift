@@ -12,7 +12,7 @@ import FoundationNetworking
 #endif
 
 public protocol RequestParameters {
-    func apply(urlRequest: URLRequest) -> URLRequest
+    func apply(urlRequest: URLRequest) throws -> URLRequest
 }
 
 /// Create a `FormParameters`
@@ -41,14 +41,15 @@ public struct JSONParameters: RequestParameters {
         self.json = json
     }
 
-    public func apply(urlRequest: URLRequest) -> URLRequest {
+    public func apply(urlRequest: URLRequest) throws -> URLRequest {
         var request = urlRequest
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        if let data = try? JSONSerialization.data(withJSONObject: json, options: []) {
+        do {
+            let data = try JSONSerialization.data(withJSONObject: json, options: [])
             request.httpBody = data
-        } else {
-            fatalError()
+        } catch {
+            throw Client.Error.requestParameters(error)
         }
 
         return request
@@ -98,14 +99,15 @@ public struct EncodableParameter<T: Encodable>: RequestParameters {
         self.model = model
     }
 
-    public func apply(urlRequest: URLRequest) -> URLRequest {
+    public func apply(urlRequest: URLRequest) throws -> URLRequest {
         var request = urlRequest
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        if let data = try? JSONEncoder().encode(model) {
+        do {
+            let data = try JSONEncoder().encode(model)
             request.httpBody = data
-        } else {
-            fatalError()
+        } catch {
+            throw Client.Error.requestParameters(error)
         }
 
         return request

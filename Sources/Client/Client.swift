@@ -20,6 +20,7 @@ open class Client {
         case remote(Swift.Error, Int)
         case parser(Swift.Error)
         case client(String)
+        case requestParameters(Swift.Error)
     }
 
     public let baseURL: String
@@ -55,7 +56,16 @@ open class Client {
         headers.forEach { urlRequest.addValue($1, forHTTPHeaderField: $0) }
 
         if let parameters = request.parameters {
-            urlRequest = parameters.apply(urlRequest: urlRequest)
+            do {
+                urlRequest = try parameters.apply(urlRequest: urlRequest)
+            } catch {
+                switch error {
+                case let clientError as Client.Error:
+                    completion(.failure(clientError))
+                default:
+                    completion(.failure(.client("Not handled error for request apply parameters")))
+                }
+            }
         }
 
         #if (os(iOS) || os(watchOS) || os(tvOS))
@@ -151,6 +161,8 @@ extension Client.Error {
             return error.localizedDescription
         case .client(let message):
             return message
+        case .requestParameters(let error):
+            return error.localizedDescription
         }
     }
 }
