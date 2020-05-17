@@ -7,45 +7,66 @@
 //
 
 import Foundation
-#if canImport(UIKit)
-import UIKit
-#endif
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
 
-open class Client {
+open class Client: ClientProtocol {
+    /// The Client error
     public enum Error: Swift.Error, LocalizedError {
+        /// The network failure
         case network(Swift.Error, Int)
+        /// The remote failure
         case remote(Swift.Error, Int)
+        /// The parser failure
         case parser(Swift.Error)
+        /// The client error
         case client(String)
+        /// The request parameter constuction
         case requestParameters(Swift.Error)
     }
 
+    /// The base url
     public let baseURL: String
+    /// The url session
     public let session: URLSession
+    /// The http headers
     public var defaultHeaders: [String: String] = [:]
 
+
+    /// Create a new client
+    /// - Parameters:
+    ///   - baseURL: The base url
+    ///   - session: The url session
     public init(baseURL: String, session: URLSession = URLSession(configuration: URLSessionConfiguration.default)) {
         self.baseURL = baseURL
         self.session = session
     }
 
-    /// For example, authorize request with the token.
+
+    /// Retrive the `Request` oject
+    /// - Parameter request: The `Request` oject
+    /// - Returns: return a new `Request`
     open func prepare<T, E>(request: Request<T, E>) -> Request<T, E> {
         return request
     }
 
+    /// Create an url
+    /// - Parameter request: The `Request` object, to configure url
+    /// - Returns: The `URL`
     open func requestUrl<Resource, Error>(for request: Request<Resource, Error>) -> URL {
         return URL(string: baseURL.appendingPathComponent(request.path))!
     }
 
-    /// Perform request.
     // swiftlint:disable function_body_length
-    @discardableResult
-    open func perform<Resource, Error>(_ request: Request<Resource, Error>,
-                                       completion: @escaping (Result<Resource, Client.Error>) -> Void) -> URLSessionTask {
+    /// Run the request
+    /// - Parameters:
+    ///   - request: The `Request` Object
+    ///   - completion: The completion block
+    /// - Returns: The `URLSessionTask`
+    @discardableResult open func perform<Resource, Error>(_ request: Request<Resource, Error>,
+                                                          completion: @escaping (Result<Resource, Client.Error>) -> Void)
+        -> URLSessionTask {
 
         let request = prepare(request: request)
         let headers = defaultHeaders.merging(contentsOf: request.headers ?? [:])
@@ -68,19 +89,7 @@ open class Client {
             }
         }
 
-        #if (os(iOS) || os(watchOS) || os(tvOS))
-        DispatchQueue.main.async {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
-        }
-        #endif
-
         let task = self.session.dataTask(with: urlRequest) { (data, urlResponse, error) in
-            #if (os(iOS) || os(watchOS) || os(tvOS))
-            DispatchQueue.main.async {
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            }
-            #endif
-
             guard let urlResponse = urlResponse as? HTTPURLResponse else {
                 if let error = error {
                     completion(.failure(.network(error, 0)))
@@ -136,33 +145,4 @@ open class Client {
         return task
     }
     // swiftlint:enable function_body_length
-}
-
-extension Client.Error {
-
-    public var code: Int? {
-        switch self {
-        case .network(_, let code):
-            return code
-        case .remote(_, let code):
-            return code
-        default:
-            return 0
-        }
-    }
-
-    public var errorDescription: String? {
-        switch self {
-        case .network(let error, _):
-            return error.localizedDescription
-        case .remote(let error, _):
-            return error.localizedDescription
-        case .parser(let error):
-            return error.localizedDescription
-        case .client(let message):
-            return message
-        case .requestParameters(let error):
-            return error.localizedDescription
-        }
-    }
 }

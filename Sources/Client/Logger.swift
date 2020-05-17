@@ -16,7 +16,6 @@ public protocol Logger {
 }
 
 public class SimpleLogger: Logger {
-
     public enum Level: Int {
         case none = 0
         case error = 1

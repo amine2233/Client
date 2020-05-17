@@ -14,7 +14,8 @@ import FoundationNetworking
 /// A Client subclass that adds logging layer.
 open class LoggingClient: Client {
 
-    open override func perform<Resource, Error>(_ request: Request<Resource, Error>, completion: @escaping (Result<Resource, Client.Error>) -> Void) -> URLSessionTask {
+    open override func perform<Resource, Error>(_ request: Request<Resource, Error>,
+                                                completion: @escaping (Result<Resource, Client.Error>) -> Void) -> URLSessionTask {
         let requestDescription: String
         if let parameters = request.parameters {
             requestDescription = "\(request.method.rawValue) \(request.path); \(String(describing: parameters))"

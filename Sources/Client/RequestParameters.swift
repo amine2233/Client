@@ -92,6 +92,7 @@ public struct StringParameter: RequestParameters {
     }
 }
 
+/// Create a body with `Encodable` object
 public struct EncodableParameter<T: Encodable>: RequestParameters {
     public let model: T
 
