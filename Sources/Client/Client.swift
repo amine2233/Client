@@ -68,8 +68,8 @@ open class Client: ClientProtocol {
                                                           completion: @escaping (Result<Resource, Client.Error>) -> Void)
         -> URLSessionTask {
 
-        let request = prepare(request: request)
-        let headers = defaultHeaders.merging(contentsOf: request.headers ?? [:])
+        var request = prepare(request: request)
+        let headers = defaultHeaders.merging(contentsOf: request.headers)
         let url = requestUrl(for: request)
 
         var urlRequest = URLRequest(url: url)
@@ -98,6 +98,12 @@ open class Client: ClientProtocol {
                 }
                 return
             }
+
+            request.headers
+                .merge(contentsOf: urlResponse.allHeaderFields
+                    .map { ($0 as? String, $1 as? String) }
+                    .compactMap()
+                )
 
             if let error = error {
                 if let data = data, let serverError = try? request.error(data) {

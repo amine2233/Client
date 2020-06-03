@@ -31,7 +31,7 @@ public struct Request<Resource, Error: Swift.Error> {
     /// The query parameters
     public var parameters: RequestParameters?
     /// The headers parameters
-    public var headers: [String: String]?
+    public var headers: [String: String]
     /// The resource parser, use this callback to parse a success response
     public var resource: (Data) throws -> Resource  // Resource parser
     /// The failure parser, use this callback to parse a failure response
@@ -41,7 +41,7 @@ public struct Request<Resource, Error: Swift.Error> {
     public init(path: String,
                 method: HTTPMethod,
                 parameters: RequestParameters? = nil,
-                headers: [String: String]? = nil,
+                headers: [String: String] = [:],
                 resource: @escaping (Data) throws -> Resource,
                 error: @escaping (Data) throws -> Error) {
 
@@ -63,7 +63,7 @@ extension Request {
     }
 
     public mutating func set(_ value: String?, forHttpHeaderKey key: String) {
-        var headers = self.headers ?? [:]
+        var headers = self.headers
         headers[key] = value
         self.headers = headers
     }

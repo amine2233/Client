@@ -102,3 +102,53 @@ extension Dictionary where Value: OptionalProtocol {
         return result
     }
 }
+
+extension Dictionary where Key: OptionalProtocol, Value: OptionalProtocol, Key.Wrapped: Hashable {
+    func compactMap(_ transform: (Key, Value) -> (Key.Wrapped, Value.Wrapped)) -> [Key.Wrapped: Value.Wrapped] {
+        var result: [Key.Wrapped: Value.Wrapped] = [:]
+        for (key, value) in self {
+            let (transformedKey, transformedValue) = transform(key, value)
+            result[transformedKey] = transformedValue
+        }
+        return result
+    }
+
+    func compactMap(_ transform: (Key, Value) throws -> (Key.Wrapped, Value.Wrapped)) rethrows -> [Key.Wrapped: Value.Wrapped] {
+        var result: [Key.Wrapped: Value.Wrapped] = [:]
+        for (key, value) in self {
+            let (transformedKey, transformedValue) = try transform(key, value)
+            result[transformedKey] = transformedValue
+        }
+        return result
+    }
+
+    func compactMap() -> [Key.Wrapped: Value.Wrapped] {
+        var result: [Key.Wrapped: Value.Wrapped] = [:]
+        for (key, value) in self {
+            if let key = key.unbox, let value = value.unbox {
+                result[key] = value
+            }
+        }
+        return result
+    }
+}
+
+extension Dictionary {
+    func map<T: Hashable, U>(_ transform: (Key, Value) -> (T, U)) -> [T: U] {
+        var result: [T: U] = [:]
+        for (key, value) in self {
+            let (transformedKey, transformedValue) = transform(key, value)
+            result[transformedKey] = transformedValue
+        }
+        return result
+    }
+
+    func map<T: Hashable, U>(_ transform: (Key, Value) throws -> (T, U)) rethrows -> [T: U] {
+        var result: [T: U] = [:]
+        for (key, value) in self {
+            let (transformedKey, transformedValue) = try transform(key, value)
+            result[transformedKey] = transformedValue
+        }
+        return result
+    }
+}
