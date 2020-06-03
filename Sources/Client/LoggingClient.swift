@@ -22,10 +22,12 @@ open class LoggingClient: Client {
         } else {
             requestDescription = "\(request.method.rawValue) \(request.path)"
         }
+        log.info("Sent path: " + request.path)
         log.info("Sent request: " + requestDescription)
+        log.info("Sent http headers: " + "\(request.headers)")
 
         return super.perform(request, completion: { (result) in
-
+            log.info("Received path: " + request.path)
             switch result {
             case .success(let value):
                 log.info("Received response for: " + requestDescription)
@@ -33,6 +35,7 @@ open class LoggingClient: Client {
             case .failure(let error):
                 log.error("Request failed: " + requestDescription + "\nWith error: " + error.localizedDescription)
             }
+            log.info("Received http headers: " + "\(request.headers)")
 
             completion(result)
         })
