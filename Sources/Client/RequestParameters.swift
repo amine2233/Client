@@ -17,7 +17,6 @@ public protocol RequestParameters {
 
 /// Create a `FormParameters`
 public struct FormParameters: RequestParameters {
-
     public let data: [String: Any]
 
     public init(_ data: [String: Any]) {
@@ -34,7 +33,6 @@ public struct FormParameters: RequestParameters {
 
 /// Create a `JSONParameters`
 public struct JSONParameters: RequestParameters {
-
     public let json: Any
 
     public init(_ json: Any) {
@@ -58,7 +56,6 @@ public struct JSONParameters: RequestParameters {
 
 /// Create a `QueryParameters`
 public struct QueryParameters: RequestParameters {
-
     public let query: [String: String]
 
     public init(_ query: [String: String]) {
@@ -78,7 +75,6 @@ public struct QueryParameters: RequestParameters {
 
 /// Create a `StringParameter` 
 public struct StringParameter: RequestParameters {
-
     public let string: String
 
     public init(_ string: String) {

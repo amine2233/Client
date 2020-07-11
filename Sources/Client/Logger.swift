@@ -40,7 +40,7 @@ public class SimpleLogger: Logger {
 
     public func info(_ message: Any) {
         guard level.rawValue >= Level.info.rawValue else { return }
-        print("[\(prefix)] 💚 \(message)")
+        print("[\(prefix)] 🟢 \(message)")
     }
 
     public func debug(_ message: Any) {

@@ -68,87 +68,100 @@ open class Client: ClientProtocol {
                                                           completion: @escaping (Result<Resource, Client.Error>) -> Void)
         -> URLSessionTask {
 
-        var request = prepare(request: request)
-        let headers = defaultHeaders.merging(contentsOf: request.headers)
-        let url = requestUrl(for: request)
+            var request = prepare(request: request)
+            let headers = defaultHeaders.merging(contentsOf: request.headers)
+            let url = requestUrl(for: request)
 
-        var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = request.method.rawValue
-        headers.forEach { urlRequest.addValue($1, forHTTPHeaderField: $0) }
+            var urlRequest = URLRequest(url: url)
+            urlRequest.httpMethod = request.method.rawValue
+            headers.forEach { urlRequest.addValue($1, forHTTPHeaderField: $0) }
 
-        if let parameters = request.parameters {
-            do {
-                urlRequest = try parameters.apply(urlRequest: urlRequest)
-            } catch {
-                switch error {
-                case let clientError as Client.Error:
-                    completion(.failure(clientError))
-                default:
-                    completion(.failure(.client("Not handled error for request apply parameters")))
+            if let parameters = request.parameters {
+                do {
+                    urlRequest = try parameters.apply(urlRequest: urlRequest)
+                } catch {
+                    switch error {
+                    case let clientError as Client.Error:
+                        completion(.failure(clientError))
+                    default:
+                        completion(.failure(.client("Not handled error for request apply parameters")))
+                    }
                 }
             }
-        }
 
-        let task = self.session.dataTask(with: urlRequest) { (data, urlResponse, error) in
-            guard let urlResponse = urlResponse as? HTTPURLResponse else {
-                if let error = error {
-                    completion(.failure(.network(error, 0)))
-                } else {
-                    completion(.failure(.client("Did not receive HTTPURLResponse. Huh?")))
+            if let body = request.body {
+                do {
+                    urlRequest = try body.apply(urlRequest: urlRequest)
+                } catch {
+                    switch error {
+                    case let clientError as Client.Error:
+                        completion(.failure(clientError))
+                    default:
+                        completion(.failure(.client("Not handled error for request apply parameters")))
+                    }
                 }
-                return
             }
 
-            request.headers
-                .merge(contentsOf: urlResponse.allHeaderFields
-                    .map { ($0 as? String, $1 as? String) }
-                    .compactMap()
+            let task = self.session.dataTask(with: urlRequest) { (data, urlResponse, error) in
+                guard let urlResponse = urlResponse as? HTTPURLResponse else {
+                    if let error = error {
+                        completion(.failure(.network(error, 0)))
+                    } else {
+                        completion(.failure(.client("Did not receive HTTPURLResponse. Huh?")))
+                    }
+                    return
+                }
+
+                request.headers
+                    .merge(contentsOf: urlResponse.allHeaderFields
+                        .map { ($0 as? String, $1 as? String) }
+                        .compactMap()
                 )
 
-            if let error = error {
-                if let data = data, let serverError = try? request.error(data) {
-                    completion(.failure(.remote(serverError, urlResponse.statusCode)))
+                if let error = error {
+                    if let data = data, let serverError = try? request.error(data) {
+                        completion(.failure(.remote(serverError, urlResponse.statusCode)))
+                    } else {
+                        completion(.failure(.network(error, urlResponse.statusCode)))
+                    }
+                    return
+                }
+
+                guard (200..<300).contains(urlResponse.statusCode) else {
+                    if let data = data, let error = try? request.error(data) {
+                        completion(.failure(.remote(error, urlResponse.statusCode)))
+                    } else {
+                        let message = "HTTP status code validation failed. Received  \(urlResponse.statusCode)."
+                        let error = Client.Error.client(message)
+                        completion(.failure(.remote(error, urlResponse.statusCode)))
+                    }
+                    return
+                }
+
+                if let data = data {
+                    do {
+                        let resource = try request.resource(data)
+                        completion(.success(resource))
+                    } catch let error as Client.Error {
+                        completion(.failure(error))
+                    } catch let error {
+                        completion(.failure(.parser(error)))
+                    }
                 } else {
-                    completion(.failure(.network(error, urlResponse.statusCode)))
-                }
-                return
-            }
-
-            guard (200..<300).contains(urlResponse.statusCode) else {
-                if let data = data, let error = try? request.error(data) {
-                    completion(.failure(.remote(error, urlResponse.statusCode)))
-                } else {
-                    let message = "HTTP status code validation failed. Received  \(urlResponse.statusCode)."
-                    let error = Client.Error.client(message)
-                    completion(.failure(.remote(error, urlResponse.statusCode)))
-                }
-                return
-            }
-
-            if let data = data {
-                do {
-                    let resource = try request.resource(data)
-                    completion(.success(resource))
-                } catch let error as Client.Error {
-                    completion(.failure(error))
-                } catch let error {
-                    completion(.failure(.parser(error)))
-                }
-            } else {
-                // no error, no data - valid empty response
-                do {
-                    let resource = try request.resource(Data())
-                    completion(.success(resource))
-                } catch let error as Client.Error {
-                    completion(.failure(error))
-                } catch let error {
-                    completion(.failure(.parser(error)))
+                    // no error, no data - valid empty response
+                    do {
+                        let resource = try request.resource(Data())
+                        completion(.success(resource))
+                    } catch let error as Client.Error {
+                        completion(.failure(error))
+                    } catch let error {
+                        completion(.failure(.parser(error)))
+                    }
                 }
             }
-        }
 
-        task.resume()
-        return task
+            task.resume()
+            return task
     }
     // swiftlint:enable function_body_length
 }

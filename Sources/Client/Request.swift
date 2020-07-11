@@ -23,13 +23,14 @@ public enum HTTPMethod: String {
 
 /// The request builder `Request<Resource, Error: Swift.Error>`
 public struct Request<Resource, Error: Swift.Error> {
-
     /// The request path
     public var path: String
     /// The request method type `HTTPMethod`
     public var method: HTTPMethod
     /// The query parameters
     public var parameters: RequestParameters?
+    /// The content body
+    public var body: RequestParameters?
     /// The headers parameters
     public var headers: [String: String]
     /// The resource parser, use this callback to parse a success response
@@ -41,6 +42,7 @@ public struct Request<Resource, Error: Swift.Error> {
     public init(path: String,
                 method: HTTPMethod,
                 parameters: RequestParameters? = nil,
+                body: RequestParameters? = nil,
                 headers: [String: String] = [:],
                 resource: @escaping (Data) throws -> Resource,
                 error: @escaping (Data) throws -> Error) {
@@ -48,6 +50,7 @@ public struct Request<Resource, Error: Swift.Error> {
         self.path = path
         self.method = method
         self.parameters = parameters
+        self.body = body
         self.headers = headers
         self.resource = resource
         self.error = error
@@ -55,7 +58,6 @@ public struct Request<Resource, Error: Swift.Error> {
 }
 
 extension Request {
-
     /// Send a request and get a `URLSessionTask`
     @discardableResult
     public func response(using client: Client, completion: @escaping (Result<Resource,Client.Error>) -> Void) -> URLSessionTask {
