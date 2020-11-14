@@ -24,6 +24,10 @@ open class Client: ClientProtocol {
         case client(String)
         /// The request parameter constuction
         case requestParameters(Swift.Error)
+        /// The request unauthorized failure
+        case unauthorized(Swift.Error)
+        /// The request unauthenticated failure
+        case unauthenticated(Swift.Error)
     }
 
     /// The base url
@@ -123,6 +127,28 @@ open class Client: ClientProtocol {
                         completion(.failure(.remote(serverError, urlResponse.statusCode)))
                     } else {
                         completion(.failure(.network(error, urlResponse.statusCode)))
+                    }
+                    return
+                }
+
+                guard urlResponse.statusCode != 401 else {
+                    if let data = data, let error = try? request.error(data) {
+                        completion(.failure(.unauthenticated(error)))
+                    } else {
+                        let message = "HTTP status code unauthorized. Received  \(urlResponse.statusCode)."
+                        let error = Client.Error.client(message)
+                        completion(.failure(.unauthenticated(error)))
+                    }
+                    return
+                }
+
+                guard urlResponse.statusCode != 403 else {
+                    if let data = data, let error = try? request.error(data) {
+                        completion(.failure(.unauthorized(error)))
+                    } else {
+                        let message = "HTTP status code unauthorized. Received  \(urlResponse.statusCode)."
+                        let error = Client.Error.client(message)
+                        completion(.failure(.unauthorized(error)))
                     }
                     return
                 }

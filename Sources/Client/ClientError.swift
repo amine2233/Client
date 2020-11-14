@@ -29,8 +29,12 @@ extension Client.Error {
             return error.localizedDescription
         case .client(let message):
             return message
-        case .requestParameters(let error):
+        case let .requestParameters(error):
             return error.localizedDescription
+        case let .unauthorized(error):
+            return "unauthorized failure :\(error.localizedDescription)"
+        case let .unauthenticated(error):
+            return "unauthenticated failure :\(error.localizedDescription)"
         }
     }
 }
