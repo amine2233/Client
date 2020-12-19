@@ -37,6 +37,8 @@ public struct Request<Resource, Error: Swift.Error> {
     public var resource: (Data) throws -> Resource  // Resource parser
     /// The failure parser, use this callback to parse a failure response
     public var error: (Data) throws -> Error        // Error parser
+    /// The empty result, use this callback to handle the empty ressource
+    public var empty: () throws -> Resource
 
     /// Create a new Request
     public init(path: String,
@@ -45,7 +47,8 @@ public struct Request<Resource, Error: Swift.Error> {
                 body: RequestParameters? = nil,
                 headers: [String: String] = [:],
                 resource: @escaping (Data) throws -> Resource,
-                error: @escaping (Data) throws -> Error) {
+                error: @escaping (Data) throws -> Error,
+                empty: @escaping () throws -> Resource) {
 
         self.path = path
         self.method = method
@@ -54,6 +57,7 @@ public struct Request<Resource, Error: Swift.Error> {
         self.headers = headers
         self.resource = resource
         self.error = error
+        self.empty = empty
     }
 }
 

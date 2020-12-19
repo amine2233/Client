@@ -14,6 +14,8 @@ extension Client.Error {
             return code
         case .remote(_, let code):
             return code
+        case .empty(_, let code):
+            return code
         default:
             return 0
         }
@@ -21,20 +23,22 @@ extension Client.Error {
 
     public var errorDescription: String? {
         switch self {
-        case .network(let error, _):
-            return error.localizedDescription
-        case .remote(let error, _):
-            return error.localizedDescription
-        case .parser(let error):
-            return error.localizedDescription
-        case .client(let message):
-            return message
+        case let .network(error, statusCode):
+            return "network failure on status code: \(statusCode) with: \(error.localizedDescription)"
+        case let .remote(error, statusCode):
+            return "remote failure on status code: \(statusCode) with: \(error.localizedDescription)"
+        case let .parser(error):
+            return "parser failure with: \(error.localizedDescription)"
+        case let .client(message):
+            return "client failure with: \(message)"
         case let .requestParameters(error):
-            return error.localizedDescription
+            return "request parameters failure with: \(error.localizedDescription)"
         case let .unauthorized(error):
             return "unauthorized failure :\(error.localizedDescription)"
         case let .unauthenticated(error):
             return "unauthenticated failure :\(error.localizedDescription)"
+        case let .empty(error, statusCode):
+            return "empty response on status code: \(statusCode) with: \(error.localizedDescription)"
         }
     }
 }

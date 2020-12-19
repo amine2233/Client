@@ -28,6 +28,8 @@ open class Client: ClientProtocol {
         case unauthorized(Swift.Error)
         /// The request unauthenticated failure
         case unauthenticated(Swift.Error)
+        /// The empty response
+        case empty(Swift.Error, Int)
     }
 
     /// The base url
@@ -164,7 +166,7 @@ open class Client: ClientProtocol {
                     return
                 }
 
-                if let data = data {
+                if let data = data, !data.isEmpty {
                     do {
                         let resource = try request.resource(data)
                         completion(.success(resource))
@@ -176,12 +178,12 @@ open class Client: ClientProtocol {
                 } else {
                     // no error, no data - valid empty response
                     do {
-                        let resource = try request.resource(Data())
+                        let resource = try request.empty()
                         completion(.success(resource))
                     } catch let error as Client.Error {
                         completion(.failure(error))
                     } catch let error {
-                        completion(.failure(.parser(error)))
+                        completion(.failure(.empty(error, urlResponse.statusCode)))
                     }
                 }
             }
