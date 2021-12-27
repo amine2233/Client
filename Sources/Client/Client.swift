@@ -11,6 +11,13 @@ import Foundation
 import FoundationNetworking
 #endif
 
+public protocol ClientProtocol {
+    func prepare<T, E>(request: Request<T, E>) -> Request<T, E>
+    func requestUrl<Resource, Error>(for request: Request<Resource, Error>) -> URL
+    func perform<Resource, Error>(_ request: Request<Resource, Error>,
+                                  completion: @escaping (Result<Resource, Client.Error>) -> Void) -> URLSessionTask
+}
+
 open class Client: ClientProtocol {
     /// The Client error
     public enum Error: Swift.Error, LocalizedError {
@@ -192,4 +199,40 @@ open class Client: ClientProtocol {
             return task
     }
     // swiftlint:enable function_body_length
+}
+
+extension Client.Error {
+    public var code: Int? {
+        switch self {
+        case .network(_, let code):
+            return code
+        case .remote(_, let code):
+            return code
+        case .empty(_, let code):
+            return code
+        default:
+            return 0
+        }
+    }
+
+    public var errorDescription: String? {
+        switch self {
+        case let .network(error, statusCode):
+            return "network failure on status code: \(statusCode) with: \(error.localizedDescription)"
+        case let .remote(error, statusCode):
+            return "remote failure on status code: \(statusCode) with: \(error.localizedDescription)"
+        case let .parser(error):
+            return "parser failure with: \(error.localizedDescription)"
+        case let .client(message):
+            return "client failure with: \(message)"
+        case let .requestParameters(error):
+            return "request parameters failure with: \(error.localizedDescription)"
+        case let .unauthorized(error):
+            return "unauthorized failure :\(error.localizedDescription)"
+        case let .unauthenticated(error):
+            return "unauthenticated failure :\(error.localizedDescription)"
+        case let .empty(error, statusCode):
+            return "empty response on status code: \(statusCode) with: \(error.localizedDescription)"
+        }
+    }
 }
