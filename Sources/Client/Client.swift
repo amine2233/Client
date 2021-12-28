@@ -13,7 +13,7 @@ import FoundationNetworking
 
 public protocol ClientProtocol {
     func prepare<T, E>(request: Request<T, E>) -> Request<T, E>
-    func requestUrl<Resource, Error>(for request: Request<Resource, Error>) -> URL
+    func requestUrl<Resource, Error>(for request: Request<Resource, Error>) -> URL?
     func perform<Resource, Error>(_ request: Request<Resource, Error>,
                                   completion: @escaping (Result<Resource, Client.Error>) -> Void) -> URLSessionTask
 }
@@ -37,6 +37,8 @@ open class Client: ClientProtocol {
         case unauthenticated(Swift.Error)
         /// The empty response
         case empty(Swift.Error, Int)
+        /// The request composition filure
+        case request(String)
     }
 
     /// The base url
@@ -67,8 +69,8 @@ open class Client: ClientProtocol {
     /// Create an url
     /// - Parameter request: The `Request` object, to configure url
     /// - Returns: The `URL`
-    open func requestUrl<Resource, Error>(for request: Request<Resource, Error>) -> URL {
-        return URL(string: baseURL.appendingPathComponent(request.path))!
+    open func requestUrl<Resource, Error>(for request: Request<Resource, Error>) -> URL? {
+        return URL(string: baseURL.appendingPathComponent(request.path))
     }
 
     // swiftlint:disable function_body_length
@@ -83,7 +85,10 @@ open class Client: ClientProtocol {
 
             var request = prepare(request: request)
             let headers = defaultHeaders.merging(contentsOf: request.headers)
-            let url = requestUrl(for: request)
+            guard let url = requestUrl(for: request) else {
+                completion(.failure(.request(request.path)))
+                return URLSessionTask()
+            }
 
             var urlRequest = URLRequest(url: url)
             urlRequest.httpMethod = request.method.rawValue
@@ -99,6 +104,7 @@ open class Client: ClientProtocol {
                     default:
                         completion(.failure(.client("Not handled error for request apply parameters")))
                     }
+                    return URLSessionTask()
                 }
             }
 
@@ -112,6 +118,7 @@ open class Client: ClientProtocol {
                     default:
                         completion(.failure(.client("Not handled error for request apply parameters")))
                     }
+                    return URLSessionTask()
                 }
             }
 
@@ -233,6 +240,8 @@ extension Client.Error {
             return "unauthenticated failure :\(error.localizedDescription)"
         case let .empty(error, statusCode):
             return "empty response on status code: \(statusCode) with: \(error.localizedDescription)"
+        case let .request(path):
+            return "failure on path: \(path)"
         }
     }
 }
