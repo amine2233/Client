@@ -64,7 +64,7 @@ public struct Request<Resource, Error: Swift.Error> {
 extension Request {
     /// Send a request and get a `URLSessionTask`
     @discardableResult
-    public func response(using client: Client, completion: @escaping (Result<Resource,Client.Error>) -> Void) -> URLSessionTask {
+    public func response(using client: Client, completion: @escaping (Result<Resource,Client.Error>) -> Void) -> URLSessionServiceTask {
         return client.perform(self, completion: completion)
     }
 
