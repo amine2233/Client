@@ -12,7 +12,7 @@ import FoundationNetworking
 #endif
 
 public protocol RequestParameters {
-    func apply(urlRequest: URLRequest) throws -> URLRequest
+    func apply(urlRequest: inout URLRequest) throws
 }
 
 /// Create a `FormParameters`
@@ -23,11 +23,9 @@ public struct FormParameters: RequestParameters {
         self.data = data
     }
 
-    public func apply(urlRequest: URLRequest) -> URLRequest {
-        var request = urlRequest
-        request.setValue("application/x-www-form-urlencoded;charset=UTF-8", forHTTPHeaderField: "Content-Type")
-        request.httpBody = data.keyValuePairs.data(using: .utf8)
-        return request
+    public func apply(urlRequest: inout URLRequest) throws {
+        urlRequest.setValue("application/x-www-form-urlencoded;charset=UTF-8", forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = data.keyValuePairs.data(using: .utf8)
     }
 }
 
@@ -39,18 +37,15 @@ public struct JSONParameters: RequestParameters {
         self.json = json
     }
 
-    public func apply(urlRequest: URLRequest) throws -> URLRequest {
-        var request = urlRequest
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    public func apply(urlRequest: inout URLRequest) throws {
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         do {
             let data = try JSONSerialization.data(withJSONObject: json, options: [])
-            request.httpBody = data
+            urlRequest.httpBody = data
         } catch {
             throw Client.Error.requestParameters(error)
         }
-
-        return request
     }
 }
 
@@ -62,14 +57,12 @@ public struct QueryParameters: RequestParameters {
         self.query = query
     }
 
-    public func apply(urlRequest: URLRequest) -> URLRequest {
-        var request = urlRequest
-        var urlComponents = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!
+    public func apply(urlRequest: inout URLRequest) {
+        var urlComponents = URLComponents(url: urlRequest.url!, resolvingAgainstBaseURL: false)!
         var items = urlComponents.queryItems ?? []
         items.append(contentsOf: query.map { URLQueryItem(name: $0.key, value: $0.value) })
         urlComponents.queryItems = items
-        request.url = urlComponents.url
-        return request
+        urlRequest.url = urlComponents.url
     }
 }
 
@@ -81,10 +74,8 @@ public struct StringParameter: RequestParameters {
         self.string = string
     }
 
-    public func apply(urlRequest: URLRequest) -> URLRequest {
-        var request = urlRequest
-        request.httpBody = string.data(using: .utf8)
-        return request
+    public func apply(urlRequest: inout URLRequest) {
+        urlRequest.httpBody = string.data(using: .utf8)
     }
 }
 
@@ -96,17 +87,14 @@ public struct EncodableParameter<T: Encodable>: RequestParameters {
         self.model = model
     }
 
-    public func apply(urlRequest: URLRequest) throws -> URLRequest {
-        var request = urlRequest
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    public func apply(urlRequest: inout URLRequest) throws {
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         do {
             let data = try JSONEncoder().encode(model)
-            request.httpBody = data
+            urlRequest.httpBody = data
         } catch {
             throw Client.Error.requestParameters(error)
         }
-
-        return request
     }
 }

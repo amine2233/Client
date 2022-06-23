@@ -25,15 +25,15 @@ class JSONParametersTests: XCTestCase {
         let id = "9879874"
         let urlString = "http://apple.com"
         guard let url = URL(string: urlString) else { XCTFail("Can't create an url"); return }
-        let urlRequest = URLRequest(url: url)
+        var urlRequest = URLRequest(url: url)
         var json: [String: Any] = [:]
         json["id"] = id
         let jsonParameters = JSONParameters(json)
-        let newURLRequest = try jsonParameters.apply(urlRequest: urlRequest)
+        try jsonParameters.apply(urlRequest: &urlRequest)
 
-        XCTAssertNotNil(newURLRequest.httpBody)
+        XCTAssertNotNil(urlRequest.httpBody)
 
-        guard let httpBody = newURLRequest.httpBody else { XCTFail("Can't read httpBody"); return }
+        guard let httpBody = urlRequest.httpBody else { XCTFail("Can't read httpBody"); return }
         let data = try JSONSerialization.jsonObject(with: httpBody, options: [])
         guard let newJSON = data as? [String: Any] else { XCTFail("Can't create new json"); return }
 

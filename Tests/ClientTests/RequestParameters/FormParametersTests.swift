@@ -24,13 +24,13 @@ class FormParametersTests: XCTestCase {
     func testWhenFormParametersTests() throws {
         let urlString = "http://apple.com"
         guard let url = URL(string: urlString) else { XCTFail("Can't create an url"); return }
-        let urlRequest = URLRequest(url: url)
+        var urlRequest = URLRequest(url: url)
         var data: [String : Any] = [:]
         data["Cache-Control"] = "no-cache"
         let formParameters = FormParameters(data)
-        let newURLRequest = formParameters.apply(urlRequest: urlRequest)
+        try formParameters.apply(urlRequest: &urlRequest)
 
-        XCTAssertEqual(newURLRequest.allHTTPHeaderFields?["Content-Type"], "application/x-www-form-urlencoded;charset=UTF-8")
+        XCTAssertEqual(urlRequest.allHTTPHeaderFields?["Content-Type"], "application/x-www-form-urlencoded;charset=UTF-8")
     }
 }
 

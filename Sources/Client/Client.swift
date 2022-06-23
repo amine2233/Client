@@ -18,10 +18,6 @@ public protocol URLSessionServiceTask {
 
 extension URLSessionDataTask: URLSessionServiceTask { }
 
-final class URLSessionServiceTaskEmpty: URLSessionTask, URLSessionServiceTask {
-    override init() {}
-}
-
 public protocol URLSessionsService {
     /*
      * data task convenience methods.  These methods create tasks that
@@ -55,7 +51,7 @@ public protocol ClientProtocol {
     func prepare<T, E>(request: Request<T, E>) -> Request<T, E>
     func requestUrl<Resource, Error>(for request: Request<Resource, Error>) -> URL?
     func perform<Resource, Error>(_ request: Request<Resource, Error>,
-                                  completion: @escaping (Result<Resource, Client.Error>) -> Void) -> URLSessionServiceTask
+                                  completion: @escaping (Result<Resource, Client.Error>) -> Void) -> URLSessionServiceTask?
     func perform<Resource, Error>(_ request: Request<Resource, Error>) async throws
         -> Resource
 }
@@ -63,9 +59,9 @@ public protocol ClientProtocol {
 open class Client: ClientProtocol {
     /// The Client error
     public enum Error: Swift.Error, LocalizedError {
-        /// The network failure
+        /// The network failure, the code represent the status_code of the request
         case network(Swift.Error, Int)
-        /// The remote failure
+        /// The remote failure, the code represent the status_code of the request
         case remote(Swift.Error, Int)
         /// The parser failure
         case parser(Swift.Error)
@@ -77,7 +73,7 @@ open class Client: ClientProtocol {
         case unauthorized(Swift.Error)
         /// The request unauthenticated failure
         case unauthenticated(Swift.Error)
-        /// The empty response
+        /// The empty response, the code represent the status_code of the request
         case empty(Swift.Error, Int)
         /// The request composition filure
         case request(String)
@@ -102,7 +98,6 @@ open class Client: ClientProtocol {
         self.session = session
     }
 
-
     /// Retrive the `Request` oject
     /// - Parameter request: The `Request` oject
     /// - Returns: return a new `Request`
@@ -125,13 +120,13 @@ open class Client: ClientProtocol {
     /// - Returns: The `URLSessionTask`
     @discardableResult open func perform<Resource, Error>(_ request: Request<Resource, Error>,
                                                           completion: @escaping (Result<Resource, Client.Error>) -> Void)
-        -> URLSessionServiceTask {
+        -> URLSessionServiceTask? {
 
             var request = prepare(request: request)
             let headers = defaultHeaders.merging(contentsOf: request.headers)
             guard let url = requestUrl(for: request) else {
                 completion(.failure(.request(request.path)))
-                return URLSessionServiceTaskEmpty()
+                return nil
             }
 
             var urlRequest = URLRequest(url: url)
@@ -140,7 +135,7 @@ open class Client: ClientProtocol {
 
             if let parameters = request.parameters {
                 do {
-                    urlRequest = try parameters.apply(urlRequest: urlRequest)
+                    try parameters.apply(urlRequest: &urlRequest)
                 } catch {
                     switch error {
                     case let clientError as Client.Error:
@@ -148,13 +143,13 @@ open class Client: ClientProtocol {
                     default:
                         completion(.failure(.client("Not handled error for request apply parameters")))
                     }
-                    return URLSessionServiceTaskEmpty()
+                    return nil
                 }
             }
 
             if let body = request.body {
                 do {
-                    urlRequest = try body.apply(urlRequest: urlRequest)
+                    try body.apply(urlRequest: &urlRequest)
                 } catch {
                     switch error {
                     case let clientError as Client.Error:
@@ -162,7 +157,7 @@ open class Client: ClientProtocol {
                     default:
                         completion(.failure(.client("Not handled error for request apply parameters")))
                     }
-                    return URLSessionServiceTaskEmpty()
+                    return nil
                 }
             }
 
@@ -251,136 +246,42 @@ open class Client: ClientProtocol {
     }
     // swiftlint:enable function_body_length
 
-    // swiftlint:disable function_body_length
     /// Run the request
     /// - Parameters:
     ///   - request: The `Request` Object
     /// - Returns: The `Resource`
-    open func perform<Resource, Error>(_ request: Request<Resource, Error>) async throws
-        -> Resource {
-
-            var request = prepare(request: request)
-            let headers = defaultHeaders.merging(contentsOf: request.headers)
-            guard let url = requestUrl(for: request) else {
-                throw Client.Error.request(request.path)
-            }
-
-            var urlRequest = URLRequest(url: url)
-            urlRequest.httpMethod = request.method.rawValue
-            headers.forEach { urlRequest.addValue($1, forHTTPHeaderField: $0) }
-
-            if let parameters = request.parameters {
-                do {
-                    urlRequest = try parameters.apply(urlRequest: urlRequest)
-                } catch {
-                    switch error {
-                    case let clientError as Client.Error:
-                        throw Client.Error.other(clientError)
-                    default:
-                        throw Client.Error.client("Not handled error for request apply parameters")
-                    }
+    open func perform<Resource, Error>(
+        _ request: Request<Resource, Error>
+    ) async throws -> Resource {
+        let result = try await withCheckedThrowingContinuation({ (continuation: CheckedContinuation<Resource, Swift.Error>) -> Void in
+            perform(request) { result in
+                switch result {
+                case .success(let data):
+                    continuation.resume(returning: data)
+                case .failure(let failure):
+                    continuation.resume(throwing: failure)
                 }
             }
-
-            if let body = request.body {
-                do {
-                    urlRequest = try body.apply(urlRequest: urlRequest)
-                } catch {
-                    switch error {
-                    case let clientError as Client.Error:
-                        throw Client.Error.other(clientError)
-                    default:
-                        throw Client.Error.client("Not handled error for request apply parameters")
-                    }
-               }
-            }
-
-            do {
-                let (data, urlResponse) = try await self.session.data(for: urlRequest)
-
-                guard let urlResponse = urlResponse as? HTTPURLResponse else {
-                    let error = Client.Error.client("Not handled HTTPURLResponse")
-                    throw Client.Error.remote(error, 0)
-                }
-
-                request.headers
-                    .merge(contentsOf: urlResponse.allHeaderFields
-                        .map { ($0 as? String, $1 as? String) }
-                        .compactMap()
-                )
-
-                guard urlResponse.statusCode != 401 else {
-                    if let error = try? request.error(data) {
-                        throw Client.Error.unauthenticated(error)
-                    } else {
-                        let message = "HTTP status code unauthorized. Received  \(urlResponse.statusCode)."
-                        let error = Client.Error.client(message)
-                        throw Client.Error.unauthenticated(error)
-                    }
-                }
-
-                guard urlResponse.statusCode != 403 else {
-                    if let error = try? request.error(data) {
-                        throw Client.Error.unauthorized(error)
-                    } else {
-                        let message = "HTTP status code unauthorized. Received  \(urlResponse.statusCode)."
-                        let error = Client.Error.client(message)
-                        throw Client.Error.unauthorized(error)
-                    }
-                }
-
-                guard (200..<300).contains(urlResponse.statusCode) else {
-                    if let error = try? request.error(data) {
-                        throw Client.Error.remote(error, urlResponse.statusCode)
-                    } else {
-                        let message = "HTTP status code validation failed. Received  \(urlResponse.statusCode)."
-                        let error = Client.Error.client(message)
-                        throw Client.Error.remote(error, urlResponse.statusCode)
-                    }
-                }
-
-                if !data.isEmpty {
-                    do {
-                        let resource = try request.resource(data)
-                        return resource
-                    } catch let error as Client.Error {
-                        throw Client.Error.other(error)
-                    } catch let error {
-                        throw Client.Error.parser(error)
-                    }
-                } else {
-                    // no error, no data - valid empty response
-                    do {
-                        let resource = try request.empty()
-                        return resource
-                    } catch let error as Client.Error {
-                        throw Client.Error.other(error)
-                    } catch let error {
-                        throw Client.Error.empty(error, urlResponse.statusCode)
-                    }
-                }
-
-            } catch {
-                throw Client.Error.remote(error, 0)
-            }
+        })
+        return result
     }
-    // swiftlint:enable function_body_length
 }
 
 extension Client.Error {
-    public var code: Int? {
+    public var statusCode: Int? {
         switch self {
-        case .network(_, let code):
-            return code
-        case .remote(_, let code):
-            return code
-        case .empty(_, let code):
-            return code
+        case .network(_, let statusCode):
+            return statusCode
+        case .remote(_, let statusCode):
+            return statusCode
+        case .empty(_, let statusCode):
+            return statusCode
         default:
-            return 0
+            return nil
         }
     }
 
+    /// A localized message describing what error occurred.
     public var errorDescription: String? {
         switch self {
         case let .network(error, statusCode):
@@ -405,4 +306,13 @@ extension Client.Error {
             return "other failure: \(error.localizedDescription)"
         }
     }
+
+    /// A localized message describing the reason for the failure.
+    public var failureReason: String? { nil }
+
+    /// A localized message describing how one might recover from the failure.
+    public var recoverySuggestion: String? { nil }
+
+    /// A localized message providing "help" text if the user requests help.
+    public var helpAnchor: String? { nil }
 }
