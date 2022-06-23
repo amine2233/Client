@@ -13,7 +13,7 @@ jobs:
       cancel-in-progress: true
     strategy:
       matrix:
-        os: [macOS-latest, ubuntu-latest]
+        os: [macOS-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -21,4 +21,4 @@ jobs:
     - name: Build
       run: swift build -v
     - name: Run tests
-      run: swift test -v
+      run: swift test -v --configuration debug -Xlinker -rpath -Xlinker "$(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.5/macosx"
