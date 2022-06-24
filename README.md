@@ -99,6 +99,12 @@ swift test --enable-test-discovery
 
 Type `exit` or `Ctrl+D` to exit the Linux shell and return to macOS.
 
+### Generate tests for Linux
+
+There is an option in the swift package manager to update `LinuxMain.swift` to generate all files and functions needed to run all the tests inside linux
+
+`swift test --generate-linuxmain`
+
 ## Contribution
 Welcome to fork and submit pull requests!!
 
