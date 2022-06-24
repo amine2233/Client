@@ -11,19 +11,57 @@ import Foundation
 import FoundationNetworking
 #endif
 
+public protocol URLSessionServiceTask {
+    func resume()
+    func cancel()
+}
+
+extension URLSessionDataTask: URLSessionServiceTask { }
+
+public protocol URLSessionsService {
+    /*
+     * data task convenience methods.  These methods create tasks that
+     * bypass the normal delegate calls for response and data delivery,
+     * and provide a simple cancelable asynchronous interface to receiving
+     * data.  Errors will be returned in the NSURLErrorDomain,
+     * see <Foundation/NSURLError.h>.  The delegate, if any, will still be
+     * called for authentication challenges.
+     */
+    func data(with request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionServiceTask
+
+    /// Convenience method to load data using an URLRequest, creates and resumes an URLSessionDataTask internally.
+    ///
+    /// - Parameter request: The URLRequest for which to load data.
+    /// - Parameter delegate: Task-specific delegate.
+    /// - Returns: Data and response.
+    func data(for request: URLRequest) async throws -> (Data, URLResponse)
+}
+
+extension URLSession: URLSessionsService {
+    public func data(with request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionServiceTask {
+        dataTask(with: request, completionHandler: completionHandler) as URLSessionServiceTask
+    }
+
+    public func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        try await data(for: request, delegate: nil)
+    }
+}
+
 public protocol ClientProtocol {
     func prepare<T, E>(request: Request<T, E>) -> Request<T, E>
     func requestUrl<Resource, Error>(for request: Request<Resource, Error>) -> URL?
     func perform<Resource, Error>(_ request: Request<Resource, Error>,
-                                  completion: @escaping (Result<Resource, Client.Error>) -> Void) -> URLSessionTask
+                                  completion: @escaping (Result<Resource, Client.Error>) -> Void) -> URLSessionServiceTask?
+    func perform<Resource, Error>(_ request: Request<Resource, Error>) async throws
+        -> Resource
 }
 
 open class Client: ClientProtocol {
     /// The Client error
     public enum Error: Swift.Error, LocalizedError {
-        /// The network failure
+        /// The network failure, the code represent the status_code of the request
         case network(Swift.Error, Int)
-        /// The remote failure
+        /// The remote failure, the code represent the status_code of the request
         case remote(Swift.Error, Int)
         /// The parser failure
         case parser(Swift.Error)
@@ -35,16 +73,18 @@ open class Client: ClientProtocol {
         case unauthorized(Swift.Error)
         /// The request unauthenticated failure
         case unauthenticated(Swift.Error)
-        /// The empty response
+        /// The empty response, the code represent the status_code of the request
         case empty(Swift.Error, Int)
         /// The request composition filure
         case request(String)
+        /// Other failure
+        case other(Swift.Error)
     }
 
     /// The base url
     public let baseURL: String
     /// The url session
-    public let session: URLSession
+    public let session: URLSessionsService
     /// The http headers
     public var defaultHeaders: [String: String] = [:]
 
@@ -53,11 +93,10 @@ open class Client: ClientProtocol {
     /// - Parameters:
     ///   - baseURL: The base url
     ///   - session: The url session
-    public init(baseURL: String, session: URLSession = URLSession(configuration: URLSessionConfiguration.default)) {
+    public init(baseURL: String, session: URLSessionsService = URLSession(configuration: URLSessionConfiguration.default)) {
         self.baseURL = baseURL
         self.session = session
     }
-
 
     /// Retrive the `Request` oject
     /// - Parameter request: The `Request` oject
@@ -81,13 +120,13 @@ open class Client: ClientProtocol {
     /// - Returns: The `URLSessionTask`
     @discardableResult open func perform<Resource, Error>(_ request: Request<Resource, Error>,
                                                           completion: @escaping (Result<Resource, Client.Error>) -> Void)
-        -> URLSessionTask {
+        -> URLSessionServiceTask? {
 
             var request = prepare(request: request)
             let headers = defaultHeaders.merging(contentsOf: request.headers)
             guard let url = requestUrl(for: request) else {
                 completion(.failure(.request(request.path)))
-                return URLSessionTask()
+                return nil
             }
 
             var urlRequest = URLRequest(url: url)
@@ -96,7 +135,7 @@ open class Client: ClientProtocol {
 
             if let parameters = request.parameters {
                 do {
-                    urlRequest = try parameters.apply(urlRequest: urlRequest)
+                    try parameters.apply(urlRequest: &urlRequest)
                 } catch {
                     switch error {
                     case let clientError as Client.Error:
@@ -104,13 +143,13 @@ open class Client: ClientProtocol {
                     default:
                         completion(.failure(.client("Not handled error for request apply parameters")))
                     }
-                    return URLSessionTask()
+                    return nil
                 }
             }
 
             if let body = request.body {
                 do {
-                    urlRequest = try body.apply(urlRequest: urlRequest)
+                    try body.apply(urlRequest: &urlRequest)
                 } catch {
                     switch error {
                     case let clientError as Client.Error:
@@ -118,11 +157,11 @@ open class Client: ClientProtocol {
                     default:
                         completion(.failure(.client("Not handled error for request apply parameters")))
                     }
-                    return URLSessionTask()
+                    return nil
                 }
             }
 
-            let task = self.session.dataTask(with: urlRequest) { (data, urlResponse, error) in
+            let task = self.session.data(with: urlRequest) { (data, urlResponse, error) in
                 guard let urlResponse = urlResponse as? HTTPURLResponse else {
                     if let error = error {
                         completion(.failure(.network(error, 0)))
@@ -206,22 +245,43 @@ open class Client: ClientProtocol {
             return task
     }
     // swiftlint:enable function_body_length
+
+    /// Run the request
+    /// - Parameters:
+    ///   - request: The `Request` Object
+    /// - Returns: The `Resource`
+    open func perform<Resource, Error>(
+        _ request: Request<Resource, Error>
+    ) async throws -> Resource {
+        let result = try await withCheckedThrowingContinuation({ (continuation: CheckedContinuation<Resource, Swift.Error>) -> Void in
+            perform(request) { result in
+                switch result {
+                case .success(let data):
+                    continuation.resume(returning: data)
+                case .failure(let failure):
+                    continuation.resume(throwing: failure)
+                }
+            }
+        })
+        return result
+    }
 }
 
 extension Client.Error {
-    public var code: Int? {
+    public var statusCode: Int? {
         switch self {
-        case .network(_, let code):
-            return code
-        case .remote(_, let code):
-            return code
-        case .empty(_, let code):
-            return code
+        case .network(_, let statusCode):
+            return statusCode
+        case .remote(_, let statusCode):
+            return statusCode
+        case .empty(_, let statusCode):
+            return statusCode
         default:
-            return 0
+            return nil
         }
     }
 
+    /// A localized message describing what error occurred.
     public var errorDescription: String? {
         switch self {
         case let .network(error, statusCode):
@@ -242,6 +302,17 @@ extension Client.Error {
             return "empty response on status code: \(statusCode) with: \(error.localizedDescription)"
         case let .request(path):
             return "failure on path: \(path)"
+        case let .other(error):
+            return "other failure: \(error.localizedDescription)"
         }
     }
+
+    /// A localized message describing the reason for the failure.
+    public var failureReason: String? { nil }
+
+    /// A localized message describing how one might recover from the failure.
+    public var recoverySuggestion: String? { nil }
+
+    /// A localized message providing "help" text if the user requests help.
+    public var helpAnchor: String? { nil }
 }

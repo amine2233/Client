@@ -12,7 +12,7 @@ import FoundationNetworking
 #endif
 
 /// The request method type
-public enum HTTPMethod: String {
+public enum HTTPMethod: String, Equatable {
     case get    = "GET"
     case put    = "PUT"
     case post   = "POST"
@@ -64,8 +64,23 @@ public struct Request<Resource, Error: Swift.Error> {
 extension Request {
     /// Send a request and get a `URLSessionTask`
     @discardableResult
-    public func response(using client: Client, completion: @escaping (Result<Resource,Client.Error>) -> Void) -> URLSessionTask {
+    public func response(using client: Client, completion: @escaping (Result<Resource,Client.Error>) -> Void) -> URLSessionServiceTask? {
         return client.perform(self, completion: completion)
+    }
+
+    public func response(using client: Client) async throws
+    -> Resource {
+        let result = try await withCheckedThrowingContinuation({ (continuation: CheckedContinuation<Resource, Swift.Error>) -> Void in
+            response(using: client) { result in
+                switch result {
+                case .success(let data):
+                    continuation.resume(returning: data)
+                case .failure(let failure):
+                    continuation.resume(throwing: failure)
+                }
+            }
+        })
+        return result
     }
 
     public mutating func set(_ value: String?, forHttpHeaderKey key: String) {

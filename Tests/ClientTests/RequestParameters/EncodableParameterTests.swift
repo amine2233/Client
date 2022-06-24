@@ -24,15 +24,15 @@ class EncodableParameterTests: XCTestCase {
     func testWhenCreateEncodableParameter() throws {
         let urlString = "http://api.rest.com"
         guard let url = URL(string: urlString) else { XCTFail("Can't create an url"); return }
-        let urlRequest = URLRequest(url: url)
+        var urlRequest = URLRequest(url: url)
 
         let user = Login(username: "client", password: "client")
         let encodableParameter = EncodableParameter(user)
-        let newURLRequest = try encodableParameter.apply(urlRequest: urlRequest)
+        try encodableParameter.apply(urlRequest: &urlRequest)
 
-        XCTAssertEqual(newURLRequest.allHTTPHeaderFields?["Content-Type"], "application/json")
+        XCTAssertEqual(urlRequest.allHTTPHeaderFields?["Content-Type"], "application/json")
 
-        guard let httpBody = newURLRequest.httpBody else {
+        guard let httpBody = urlRequest.httpBody else {
             XCTFail("Can't read httpBody");
             return
         }

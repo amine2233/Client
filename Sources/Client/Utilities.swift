@@ -29,7 +29,6 @@ extension String {
 }
 
 extension Dictionary {
-
     var jsonString: String {
         let json = try! JSONSerialization.data(withJSONObject: self, options: [])
         return String(data: json, encoding: .utf8)!
@@ -37,7 +36,6 @@ extension Dictionary {
 }
 
 extension Array {
-
     var jsonString: String {
         let json = try! JSONSerialization.data(withJSONObject: self, options: [])
         return String(data: json, encoding: .utf8)!
@@ -45,7 +43,6 @@ extension Array {
 }
 
 extension Dictionary {
-
     var keyValuePairs: String {
         return map { keyValue in
                 let key = keyValue.key
@@ -57,7 +54,6 @@ extension Dictionary {
 }
 
 extension Dictionary {
-
     public mutating func merge(contentsOf dictionary: [Key: Value]) {
         dictionary.forEach { key, value in
             self[key] = value
@@ -89,7 +85,6 @@ extension Optional: OptionalProtocol {
 // swiftlint:enable syntactic_sugar
 
 extension Dictionary where Value: OptionalProtocol {
-
     public var nonNils: [Key: Value.Wrapped] {
         var result: [Key: Value.Wrapped] = [:]
 

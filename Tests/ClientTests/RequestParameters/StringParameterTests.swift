@@ -25,13 +25,13 @@ class StringParameterTests: XCTestCase {
 
         let urlString = "http://api.rest.com"
         guard let url = URL(string: urlString) else { XCTFail("Can't create an url"); return }
-        let urlRequest = URLRequest(url: url)
+        var urlRequest = URLRequest(url: url)
 
         let randomString = String.random(length: 10)
         let stringParameter = StringParameter(randomString)
-        let newURLRequest = stringParameter.apply(urlRequest: urlRequest)
+        stringParameter.apply(urlRequest: &urlRequest)
 
-        guard let data = newURLRequest.httpBody else {
+        guard let data = urlRequest.httpBody else {
             XCTFail("Can't create an url");
             return
         }

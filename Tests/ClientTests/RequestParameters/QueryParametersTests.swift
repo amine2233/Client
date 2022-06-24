@@ -24,7 +24,7 @@ class QueryParametersTests: XCTestCase {
     func testWhenCreateQueryParameters() throws {
         let urlString = "http://api.rest.com"
         guard let url = URL(string: urlString) else { XCTFail("Can't create an url"); return }
-        let urlRequest = URLRequest(url: url)
+        var urlRequest = URLRequest(url: url)
 
         var queriesParameters: [String: String] = [:]
 
@@ -32,9 +32,9 @@ class QueryParametersTests: XCTestCase {
         queriesParameters["location"] = "london"
 
         let queryParameter = QueryParameters(queriesParameters)
-        let newURLRequest = queryParameter.apply(urlRequest: urlRequest)
+        queryParameter.apply(urlRequest: &urlRequest)
 
-        guard let newURL = newURLRequest.url else {
+        guard let newURL = urlRequest.url else {
             XCTFail("Can't create an url");
             return
         }

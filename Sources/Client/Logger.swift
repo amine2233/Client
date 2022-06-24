@@ -15,42 +15,54 @@ public protocol Logger {
     func debug(_ message: Any)
 }
 
-public class SimpleLogger: Logger {
-    public enum Level: Int {
-        case none = 0
-        case error = 1
-        case warning = 2
-        case info = 3
-        case debug = 4
+public struct LoggerLevel: OptionSet {
+    public let rawValue: Int
+
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
     }
 
-    public let prefix: String
+    public static let none = LoggerLevel(rawValue: 1 << 0)
+    public static let error = LoggerLevel(rawValue: 1 << 1)
+    public static let warning = LoggerLevel(rawValue: 1 << 2)
+    public static let info = LoggerLevel(rawValue: 1 << 3)
+    public static let debug = LoggerLevel(rawValue: 1 << 3)
+}
 
-    public var level: Level = .debug
-
-    public func error(_ message: Any) {
-        guard level.rawValue >= Level.error.rawValue else { return }
-        print("[\(prefix)] 💥 \(message)")
-    }
-
-    public func warning(_ message: Any) {
-        guard level.rawValue >= Level.warning.rawValue else { return }
-        print("[\(prefix)] ⚠️ \(message)")
-    }
-
-    public func info(_ message: Any) {
-        guard level.rawValue >= Level.info.rawValue else { return }
-        print("[\(prefix)] 🟢 \(message)")
-    }
-
-    public func debug(_ message: Any) {
-        guard level.rawValue >= Level.debug.rawValue else { return }
-        print("[\(prefix)] 🐞 \(message)")
-    }
-
-    public init(prefix: String) {
-        self.prefix = prefix
+public enum LoggerFactory {
+    public static func build(prefix: String = "Client", level: LoggerLevel = .debug) -> Logger {
+        LoggerDefault(prefix: prefix, level: level)
     }
 }
 
-public var log: Logger = SimpleLogger(prefix: "Client")
+final class LoggerDefault: Logger {
+
+    var level: LoggerLevel
+
+    private let prefix: String
+
+    init(prefix: String, level: LoggerLevel = .debug) {
+        self.prefix = prefix
+        self.level = level
+    }
+
+    func error(_ message: Any) {
+        guard level.rawValue >= LoggerLevel.error.rawValue else { return }
+        print("[\(prefix)] 💥 \(message)")
+    }
+
+    func warning(_ message: Any) {
+        guard level.rawValue >= LoggerLevel.warning.rawValue else { return }
+        print("[\(prefix)] ⚠️ \(message)")
+    }
+
+    func info(_ message: Any) {
+        guard level.rawValue >= LoggerLevel.info.rawValue else { return }
+        print("[\(prefix)] 🟢 \(message)")
+    }
+
+    func debug(_ message: Any) {
+        guard level.rawValue >= LoggerLevel.debug.rawValue else { return }
+        print("[\(prefix)] 🐞 \(message)")
+    }
+}
